@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
-import { Upload, FileSpreadsheet, Sparkles, Table, Trash2 } from 'lucide-react'
+import { Upload, FileSpreadsheet, Sparkles, Table, Trash2, HardDrive } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -164,8 +164,16 @@ function DataSourceCard({
   onSelect: () => void
   onRemove: () => void
 }) {
+  const { state, dispatch } = useStore()
+  const toast = useToast()
+  const [showDbMenu, setShowDbMenu] = useState(false)
+
   const numFields = dataSource.fields.filter(f => f.type === 'number').length
   const textFields = dataSource.fields.filter(f => f.type !== 'number').length
+
+  const assignedDb = dataSource.databaseCategoryId
+    ? state.databaseCategories.find(c => c.id === dataSource.databaseCategoryId)
+    : null
 
   return (
     <div
@@ -182,7 +190,7 @@ function DataSourceCard({
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-foreground truncate">{dataSource.name}</p>
-        <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground flex-wrap">
           <span>{dataSource.rowCount} 行</span>
           <span>·</span>
           <span>{dataSource.fields.length} 个字段</span>
@@ -191,8 +199,92 @@ function DataSourceCard({
             <Badge variant="dimension">{textFields} 文本</Badge>
             <Badge variant="metric">{numFields} 数值</Badge>
           </div>
+          {assignedDb && (
+            <>
+              <span>·</span>
+              <span className="inline-flex items-center gap-1 text-primary/80">
+                <HardDrive className="h-3 w-3" />
+                {assignedDb.name}
+              </span>
+            </>
+          )}
         </div>
       </div>
+
+      {/* Assign to database button */}
+      <div className="relative flex-shrink-0">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground hover:text-primary"
+          title={assignedDb ? `已归集至「${assignedDb.name}」，点击更改` : '归集到数据库'}
+          onClick={e => {
+            e.stopPropagation()
+            setShowDbMenu(!showDbMenu)
+          }}
+        >
+          <HardDrive className={cn('h-4 w-4', assignedDb && 'text-primary')} />
+        </Button>
+        {showDbMenu && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setShowDbMenu(false) }} />
+            <div className="absolute right-0 top-full mt-1 z-50 w-48 rounded-lg border border-border bg-popover shadow-elegant py-1">
+              {state.databaseCategories.length === 0 ? (
+                <p className="px-3 py-2 text-xs text-muted-foreground">暂无数据库，请先创建</p>
+              ) : (
+                <>
+                  {state.databaseCategories.map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        dispatch({
+                          type: 'ASSIGN_DATA_SOURCE_TO_DATABASE',
+                          payload: { dataSourceId: dataSource.id, databaseCategoryId: cat.id },
+                        })
+                        toast.success(`已归集至「${cat.name}」`)
+                        setShowDbMenu(false)
+                      }}
+                      className={cn(
+                        'w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-surface transition-colors text-left',
+                        dataSource.databaseCategoryId === cat.id
+                          ? 'text-primary font-medium'
+                          : 'text-foreground',
+                      )}
+                    >
+                      <HardDrive className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                      <span className="truncate">{cat.name}</span>
+                      {dataSource.databaseCategoryId === cat.id && (
+                        <span className="text-[10px] text-primary ml-auto">当前</span>
+                      )}
+                    </button>
+                  ))}
+                  {assignedDb && (
+                    <>
+                      <div className="my-1 border-t border-border" />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          dispatch({
+                            type: 'ASSIGN_DATA_SOURCE_TO_DATABASE',
+                            payload: { dataSourceId: dataSource.id, databaseCategoryId: undefined },
+                          })
+                          toast.info('已取消归集')
+                          setShowDbMenu(false)
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-surface transition-colors text-left"
+                      >
+                        取消归集
+                      </button>
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+
       <Button
         variant="ghost"
         size="icon"
