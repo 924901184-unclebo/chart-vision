@@ -359,7 +359,7 @@ export function FieldConfigurator({
   const hasConfig = fieldConfig.dimensions.length > 0 && fieldConfig.metrics.length > 0
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="flex-1 flex flex-col space-y-5 animate-fade-in">
       {/* 配置库选择条 */}
       {state.fieldPresets.length > 0 && (
         <Card className="border-primary/15 bg-primary/[0.03]">
@@ -393,7 +393,7 @@ export function FieldConfigurator({
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-0">
           {/* 第一栏：维度字段 */}
           <ConfigFieldPanel
             type="dimension"

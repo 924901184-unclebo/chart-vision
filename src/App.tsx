@@ -98,7 +98,7 @@ export default function App() {
         hasData={hasData}
       />
 
-      <main className="flex-1 overflow-y-auto custom-scrollbar">
+      <main className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border px-8 py-4 glass">
           <div>
@@ -153,7 +153,8 @@ export default function App() {
         </header>
 
         {/* Content */}
-        <div className={`p-8 mx-auto ${['configure', 'design'].includes(state.currentStep) ? 'max-w-[1400px]' : 'max-w-6xl'}`}>
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <div className={`p-8 mx-auto ${['configure', 'design'].includes(state.currentStep) ? 'max-w-[1400px] min-h-[calc(100%-2rem)] flex flex-col' : 'max-w-6xl'}`}>
           {/* Step 1: Upload */}
           {state.currentStep === 'upload' && (
             <div className="space-y-6">
@@ -241,6 +242,7 @@ export default function App() {
           {state.currentStep === 'design' && (
             <InterfaceDesigner />
           )}
+          </div>
         </div>
       </main>
 

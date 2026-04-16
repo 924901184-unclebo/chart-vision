@@ -232,7 +232,7 @@ export function InterfaceDesigner() {
   }, [dispatch, toast])
 
   return (
-    <div className="flex gap-5 h-[calc(100vh-8rem)] animate-fade-in">
+    <div className="flex gap-5 flex-1 min-h-0 animate-fade-in">
       {/* ═══ 左侧：图表库 ═══ */}
       <div className="w-80 flex-shrink-0 flex flex-col">
         <Card className="flex-1 flex flex-col overflow-hidden border-primary/10">
