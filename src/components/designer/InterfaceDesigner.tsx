@@ -601,7 +601,9 @@ function buildMiniOption(chart: LibraryChart, rows: import('@/types').DataRow[])
   }
 
   if (chart.chartType === 'pie') {
-    const pieData = getPieData(rows, chart.dimensions, chart.metrics)
+    const dim = chart.dimensions[0]
+    const metric = chart.metrics[0]
+    const pieData = getPieData(rows, dim.fieldName, metric)
     return {
       ...base,
       grid: undefined,
@@ -618,12 +620,15 @@ function buildMiniOption(chart: LibraryChart, rows: import('@/types').DataRow[])
   }
 
   if (chart.chartType === 'scatter') {
-    const scatterData = getScatterData(rows, chart.dimensions, chart.metrics)
+    const xMetric = chart.metrics[0].fieldName
+    const yMetric = chart.metrics[1]?.fieldName || xMetric
+    const groupField = chart.dimensions[0]?.fieldName
+    const scatterData = getScatterData(rows, xMetric, yMetric, groupField)
     return {
       ...base,
       xAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } }, axisLabel: { fontSize: 9, color: 'rgba(255,255,255,0.3)' } },
       yAxis: { type: 'value', splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } }, axisLabel: { fontSize: 9, color: 'rgba(255,255,255,0.3)' } },
-      series: [{ type: 'scatter', data: scatterData, symbolSize: 6 }],
+      series: scatterData.map(s => ({ type: 'scatter' as const, data: s.data, symbolSize: 6 })),
     }
   }
 
